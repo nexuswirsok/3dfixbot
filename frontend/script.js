@@ -330,6 +330,12 @@ function renderOrders() {
                     📦 Выдан
                 </button>
 
+                <button
+                    class="btn-history"
+                    onclick="showHistory(${order.id})">
+                    🕘 История
+                </button>
+
             </div>
         `;
 

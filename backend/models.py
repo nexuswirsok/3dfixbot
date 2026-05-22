@@ -17,6 +17,7 @@ class Order(Base):
     price = Column(String)
     accept_date = Column(String)
     visit_date = Column(String)
+    visit_time = Column(String)
     master = Column(String)
     status = Column(String)
     photo_url = Column(String)

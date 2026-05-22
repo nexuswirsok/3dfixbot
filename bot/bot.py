@@ -179,10 +179,45 @@ async def get_master(message: Message, state: FSMContext):
     )
 
     await message.answer(
-        "Вставьте ссылку на фото или напишите: Нет"
+        "Отправьте фото заказа или напишите: Нет"
     )
 
-    await state.set_state(AddOrder.photo_url)
+    await state.set_state(AddOrder.photo)
+
+@dp.message(AddOrder.photo)
+async def get_photo(message: Message, state: FSMContext):
+
+    photo_url = None
+
+    if message.photo:
+        file_id = message.photo[-1].file_id
+        photo_url = f"{api.BACKEND_URL}/telegram-photo/{file_id}"
+
+    elif message.text and message.text.lower() != "нет":
+        await message.answer(
+            "Отправьте фото или напишите: Нет"
+        )
+        return
+
+    await state.update_data(
+        photo_url=photo_url
+    )
+
+    data = await state.get_data()
+
+    result = api.create_order(data)
+
+    if "id" not in result:
+        await message.answer("Ошибка создания заказа. Проверь backend.")
+        await state.clear()
+        return
+
+    await message.answer(
+        f"Заказ создан\nID: {result['id']}",
+        reply_markup=main_keyboard
+    )
+
+    await state.clear()
 
 @dp.message(AddOrder.photo_url)
 async def get_photo_url(message: Message, state: FSMContext):

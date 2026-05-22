@@ -166,6 +166,18 @@ async def get_visit_date(message: Message, state: FSMContext):
         visit_date=message.text
     )
 
+    await message.answer(
+        "Введите время выезда\n\nЕсли выезд не нужен — напишите: Нет"
+    )
+
+    await state.set_state(AddOrder.visit_time)
+
+@dp.message(AddOrder.visit_time)
+async def get_visit_time(message: Message, state: FSMContext):
+    await state.update_data(
+        visit_time=message.text
+    )
+
     await message.answer("Введите имя мастера")
 
     await state.set_state(AddOrder.master)

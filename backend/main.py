@@ -7,9 +7,10 @@ from fastapi.responses import JSONResponse, Response
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from sqlalchemy import func
+from datetime import datetime
 
 from database import engine, SessionLocal
-from models import Base, Order
+from models import Base, Order, OrderHistory
 from schemas import OrderCreate, StatusUpdate, LoginRequest
 
 
@@ -141,6 +142,21 @@ def get_auth_user(authorization: str | None, x_api_key: str | None):
 
     raise HTTPException(status_code=401, detail="Unauthorized")
 
+def add_history(order_id, action, old_value, new_value, actor):
+    db: Session = SessionLocal()
+
+    history = OrderHistory(
+        order_id=order_id,
+        action=action,
+        old_value=old_value,
+        new_value=new_value,
+        actor=actor,
+        created_at=datetime.now().strftime("%d.%m.%Y %H:%M")
+    )
+
+    db.add(history)
+    db.commit()
+    db.close()
 
 @app.get("/")
 async def root():
@@ -213,6 +229,14 @@ async def create_order(
     db.refresh(new_order)
 
     order_id = new_order.id
+
+    add_history(
+        order_id=order_id,
+        action="Создание заказа",
+        old_value="-",
+        new_value="Принят",
+        actor=order.master
+    )
 
     notify_master_about_order(new_order)
 
@@ -291,9 +315,26 @@ async def update_order_status(
         db.close()
         raise HTTPException(status_code=403, detail="Forbidden")
 
+    old_status = order.status
+
     order.status = data.status
 
     db.commit()
+    actor = "Администратор"
+
+    if user["role"] == "master":
+        actor = user["master"]
+
+    if user["role"] == "bot":
+        actor = "Telegram Bot"
+
+    add_history(
+        order_id=order_id,
+        action="Изменение статуса",
+        old_value=old_status,
+        new_value=data.status,
+        actor=actor
+    )
     db.close()
 
     return {
@@ -398,3 +439,50 @@ async def get_telegram_photo(file_id: str):
         content=image_response.content,
         media_type="image/jpeg"
     )
+
+@app.get("/orders/{order_id}/history")
+async def get_order_history(
+    order_id: int,
+    authorization: str | None = Header(default=None),
+    x_api_key: str | None = Header(default=None)
+):
+    user = get_auth_user(authorization, x_api_key)
+
+    db: Session = SessionLocal()
+
+    order = db.query(Order).filter(Order.id == order_id).first()
+
+    if not order:
+        db.close()
+        return {
+            "error": "Order not found"
+        }
+
+    if user["role"] == "master":
+        if order.master.strip().lower() != user["master"].strip().lower():
+            db.close()
+            raise HTTPException(status_code=403, detail="Forbidden")
+
+    history = (
+        db.query(OrderHistory)
+        .filter(OrderHistory.order_id == order_id)
+        .order_by(OrderHistory.id.desc())
+        .all()
+    )
+
+    result = []
+
+    for item in history:
+        result.append({
+            "id": item.id,
+            "order_id": item.order_id,
+            "action": item.action,
+            "old_value": item.old_value,
+            "new_value": item.new_value,
+            "actor": item.actor,
+            "created_at": item.created_at
+        })
+
+    db.close()
+
+    return result

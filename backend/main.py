@@ -11,7 +11,7 @@ from datetime import datetime
 
 from database import engine, SessionLocal
 from models import Base, Order, OrderHistory
-from schemas import OrderCreate, StatusUpdate, LoginRequest
+from schemas import OrderCreate, OrderUpdate, StatusUpdate, LoginRequest
 
 
 API_KEY = os.getenv("API_KEY")
@@ -576,5 +576,61 @@ async def delete_order(
 
     return {
         "message": "Order deleted",
+        "id": order_id
+    }
+
+@app.put("/orders/{order_id}")
+async def update_order(
+    order_id: int,
+    data: OrderUpdate,
+    authorization: str | None = Header(default=None),
+    x_api_key: str | None = Header(default=None)
+):
+    user = get_auth_user(authorization, x_api_key)
+
+    if user["role"] != "admin":
+        raise HTTPException(status_code=403, detail="Only admin can edit orders")
+
+    db: Session = SessionLocal()
+
+    order = db.query(Order).filter(Order.id == order_id).first()
+
+    if not order:
+        db.close()
+        return {
+            "error": "Order not found"
+        }
+
+    old_value = (
+        f"{order.fio}, {order.phone}, {order.printer}, "
+        f"{order.description}, {order.price}, "
+        f"{order.visit_date}, {order.visit_time}, {order.master}"
+    )
+
+    order.order_type = data.order_type
+    order.fio = data.fio
+    order.phone = data.phone
+    order.printer = data.printer
+    order.description = data.description
+    order.price = data.price
+    order.accept_date = data.accept_date
+    order.visit_date = data.visit_date
+    order.visit_time = data.visit_time
+    order.master = data.master
+
+    db.commit()
+
+    add_history(
+        order_id=order_id,
+        action="Редактирование заказа",
+        old_value=old_value,
+        new_value="Данные заказа обновлены",
+        actor="Администратор"
+    )
+
+    db.close()
+
+    return {
+        "message": "Order updated",
         "id": order_id
     }

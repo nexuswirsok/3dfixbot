@@ -13,8 +13,23 @@
 <div class="stats">
 
     <div class="stat-box">
-        <div class="stat-title">Заказов</div>
+        <div class="stat-title">Всего заказов</div>
         <div class="stat-value" id="totalOrders">0</div>
+    </div>
+
+    <div class="stat-box">
+        <div class="stat-title">В ремонте</div>
+        <div class="stat-value" id="inRepair">0</div>
+    </div>
+
+    <div class="stat-box">
+        <div class="stat-title">Готово</div>
+        <div class="stat-value" id="readyOrders">0</div>
+    </div>
+
+    <div class="stat-box">
+        <div class="stat-title">Выдано</div>
+        <div class="stat-value" id="doneOrders">0</div>
     </div>
 
     <div class="stat-box">
@@ -23,6 +38,9 @@
     </div>
 
 </div>
+
+<h2>KPI мастеров</h2>
+<div id="mastersKpi" class="masters-kpi"></div>
 
 <div class="top-bar">
 
@@ -33,17 +51,11 @@
     >
 
     <select id="statusFilter">
-
         <option value="all">Все</option>
-
         <option value="Принят">Принят</option>
-
         <option value="В ремонте">В ремонте</option>
-
         <option value="Готов">Готов</option>
-
         <option value="Выдан">Выдан</option>
-
     </select>
 
 </div>

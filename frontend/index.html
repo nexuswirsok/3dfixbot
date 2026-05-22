@@ -2,31 +2,55 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>3D FIX LAB CRM</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<div class="container">
-    <h1>3D FIX LAB CRM</h1>
+<h1>3D FIX LAB CRM</h1>
 
-    <div class="stats" id="stats"></div>
+<div class="stats">
 
-    <div class="controls">
-        <input id="searchInput" placeholder="Поиск по имени или телефону">
-
-        <select id="statusFilter">
-            <option value="">Все статусы</option>
-            <option value="Принят">Принят</option>
-            <option value="В ремонте">В ремонте</option>
-            <option value="Готов">Готов</option>
-            <option value="Выдан">Выдан</option>
-        </select>
+    <div class="stat-box">
+        <div class="stat-title">Заказов</div>
+        <div class="stat-value" id="totalOrders">0</div>
     </div>
 
-    <div id="orders"></div>
+    <div class="stat-box">
+        <div class="stat-title">Выручка</div>
+        <div class="stat-value" id="totalRevenue">0 ₽</div>
+    </div>
+
 </div>
 
+<div class="top-bar">
+
+    <input
+        type="text"
+        id="search"
+        placeholder="Поиск по клиенту или телефону"
+    >
+
+    <select id="statusFilter">
+
+        <option value="all">Все</option>
+
+        <option value="Принят">Принят</option>
+
+        <option value="В ремонте">В ремонте</option>
+
+        <option value="Готов">Готов</option>
+
+        <option value="Выдан">Выдан</option>
+
+    </select>
+
+</div>
+
+<div class="orders" id="orders"></div>
+
 <script src="script.js"></script>
+
 </body>
 </html>

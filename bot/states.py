@@ -11,5 +11,5 @@ class AddOrder(StatesGroup):
     accept_date = State()
     visit_date = State()
     master = State()
-    photo_url = State()
+    photo = State()
     search = State()

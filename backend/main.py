@@ -12,6 +12,8 @@ from schemas import OrderCreate, StatusUpdate, LoginRequest
 
 API_KEY = os.getenv("API_KEY")
 WEB_PASSWORD = os.getenv("WEB_PASSWORD")
+ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD")
+MASTER_PASSWORDS = os.getenv("MASTER_PASSWORDS", "")
 
 
 app = FastAPI()
@@ -29,17 +31,46 @@ app.add_middleware(
 Base.metadata.create_all(bind=engine)
 
 
-def check_auth(authorization: str | None, x_api_key: str | None):
+def parse_master_passwords():
+    result = {}
+
+    pairs = MASTER_PASSWORDS.split(";")
+
+    for pair in pairs:
+        if ":" in pair:
+            name, password = pair.split(":", 1)
+            result[password.strip()] = name.strip()
+
+    return result
+
+
+def get_auth_user(authorization: str | None, x_api_key: str | None):
     if x_api_key == API_KEY:
-        return True
+        return {
+            "role": "bot",
+            "master": None
+        }
 
-    if authorization == f"Bearer {API_KEY}":
-        return True
+    if not authorization:
+        raise HTTPException(status_code=401, detail="Unauthorized")
 
-    raise HTTPException(
-        status_code=401,
-        detail="Unauthorized"
-    )
+    token = authorization.replace("Bearer ", "")
+
+    if token == API_KEY:
+        return {
+            "role": "admin",
+            "master": None
+        }
+
+    if token.startswith("master:"):
+        master_name = token.replace("master:", "", 1)
+
+        return {
+            "role": "master",
+            "master": master_name
+        }
+
+    raise HTTPException(status_code=401, detail="Unauthorized")
 
 
 @app.get("/")
@@ -51,15 +82,35 @@ async def root():
 
 @app.post("/login")
 async def login(data: LoginRequest):
-    if data.password != WEB_PASSWORD:
-        raise HTTPException(
-            status_code=401,
-            detail="Wrong password"
-        )
+    if ADMIN_PASSWORD and data.password == ADMIN_PASSWORD:
+        return {
+            "token": API_KEY,
+            "role": "admin",
+            "master": None
+        }
 
-    return {
-        "token": API_KEY
-    }
+    if WEB_PASSWORD and data.password == WEB_PASSWORD:
+        return {
+            "token": API_KEY,
+            "role": "admin",
+            "master": None
+        }
+
+    masters = parse_master_passwords()
+
+    if data.password in masters:
+        master_name = masters[data.password]
+
+        return {
+            "token": f"master:{master_name}",
+            "role": "master",
+            "master": master_name
+        }
+
+    raise HTTPException(
+        status_code=401,
+        detail="Wrong password"
+    )
 
 
 @app.post("/orders")
@@ -67,7 +118,10 @@ async def create_order(
     order: OrderCreate,
     x_api_key: str | None = Header(default=None)
 ):
-    check_auth(None, x_api_key)
+    user = get_auth_user(None, x_api_key)
+
+    if user["role"] != "bot":
+        raise HTTPException(status_code=403, detail="Forbidden")
 
     db: Session = SessionLocal()
 
@@ -103,11 +157,16 @@ async def get_orders(
     authorization: str | None = Header(default=None),
     x_api_key: str | None = Header(default=None)
 ):
-    check_auth(authorization, x_api_key)
+    user = get_auth_user(authorization, x_api_key)
 
     db: Session = SessionLocal()
 
-    orders = db.query(Order).order_by(Order.id.desc()).all()
+    query = db.query(Order)
+
+    if user["role"] == "master":
+        query = query.filter(Order.master == user["master"])
+
+    orders = query.order_by(Order.id.desc()).all()
 
     result = []
 
@@ -141,7 +200,7 @@ async def update_order_status(
     authorization: str | None = Header(default=None),
     x_api_key: str | None = Header(default=None)
 ):
-    check_auth(authorization, x_api_key)
+    user = get_auth_user(authorization, x_api_key)
 
     db: Session = SessionLocal()
 
@@ -152,6 +211,10 @@ async def update_order_status(
         return {
             "error": "Order not found"
         }
+
+    if user["role"] == "master" and order.master != user["master"]:
+        db.close()
+        raise HTTPException(status_code=403, detail="Forbidden")
 
     order.status = data.status
 
@@ -170,11 +233,16 @@ async def get_stats(
     authorization: str | None = Header(default=None),
     x_api_key: str | None = Header(default=None)
 ):
-    check_auth(authorization, x_api_key)
+    user = get_auth_user(authorization, x_api_key)
 
     db: Session = SessionLocal()
 
-    orders = db.query(Order).all()
+    query = db.query(Order)
+
+    if user["role"] == "master":
+        query = query.filter(Order.master == user["master"])
+
+    orders = query.all()
 
     total_orders = len(orders)
     in_repair = len([order for order in orders if order.status == "В ремонте"])
@@ -211,5 +279,7 @@ async def get_stats(
         "ready": ready,
         "done": done,
         "total_money": total_money,
-        "masters": masters
+        "masters": masters,
+        "role": user["role"],
+        "master": user["master"]
     }

@@ -1,6 +1,8 @@
 const API_URL = "https://3dfixbot-production.up.railway.app";
 
 let TOKEN = localStorage.getItem("crm_token");
+let ROLE = localStorage.getItem("crm_role");
+let MASTER = localStorage.getItem("crm_master");
 
 let orders = [];
 
@@ -12,7 +14,6 @@ function getHeaders() {
 }
 
 async function login() {
-
     const password = document.getElementById("password").value;
 
     const response = await fetch(`${API_URL}/login`, {
@@ -33,14 +34,22 @@ async function login() {
     const data = await response.json();
 
     TOKEN = data.token;
+    ROLE = data.role;
+    MASTER = data.master;
 
     localStorage.setItem("crm_token", TOKEN);
+    localStorage.setItem("crm_role", ROLE);
+
+    if (MASTER) {
+        localStorage.setItem("crm_master", MASTER);
+    } else {
+        localStorage.removeItem("crm_master");
+    }
 
     startCRM();
 }
 
 async function loadStats() {
-
     const response = await fetch(`${API_URL}/stats`, {
         headers: getHeaders()
     });
@@ -58,16 +67,26 @@ async function loadStats() {
     document.getElementById("doneOrders").innerText = stats.done;
     document.getElementById("totalRevenue").innerText = `${stats.total_money} ₽`;
 
-    const mastersContainer = document.getElementById("mastersKpi");
+    const userInfo = document.getElementById("userInfo");
 
+    if (stats.role === "admin") {
+        userInfo.innerHTML = "Режим: Администратор";
+    } else {
+        userInfo.innerHTML = `Режим: Мастер — ${stats.master}`;
+    }
+
+    const mastersContainer = document.getElementById("mastersKpi");
     mastersContainer.innerHTML = "";
 
     const masters = stats.masters || {};
 
+    if (Object.keys(masters).length === 0) {
+        mastersContainer.innerHTML = "<p>Нет данных</p>";
+        return;
+    }
+
     Object.keys(masters).forEach(master => {
-
         const item = document.createElement("div");
-
         item.className = "master-card";
 
         item.innerHTML = `
@@ -77,12 +96,10 @@ async function loadStats() {
         `;
 
         mastersContainer.appendChild(item);
-
     });
 }
 
 async function loadOrders() {
-
     const response = await fetch(`${API_URL}/orders`, {
         headers: getHeaders()
     });
@@ -98,7 +115,6 @@ async function loadOrders() {
 }
 
 async function updateStatus(orderId, status) {
-
     await fetch(`${API_URL}/orders/${orderId}/status`, {
         method: "PUT",
         headers: getHeaders(),
@@ -112,17 +128,13 @@ async function updateStatus(orderId, status) {
 }
 
 function renderOrders() {
-
     const search = document.getElementById("search").value.toLowerCase();
-
     const filter = document.getElementById("statusFilter").value;
 
     const container = document.getElementById("orders");
-
     container.innerHTML = "";
 
     const filtered = orders.filter(order => {
-
         const matchesSearch =
             order.fio.toLowerCase().includes(search) ||
             order.phone.includes(search);
@@ -133,8 +145,12 @@ function renderOrders() {
         return matchesSearch && matchesStatus;
     });
 
-    filtered.forEach(order => {
+    if (filtered.length === 0) {
+        container.innerHTML = "<p>Заказов нет</p>";
+        return;
+    }
 
+    filtered.forEach(order => {
         let statusClass = "status-new";
 
         if (order.status === "В ремонте") {
@@ -150,12 +166,10 @@ function renderOrders() {
         }
 
         const card = document.createElement("div");
-
         card.className = "order-card";
 
         card.innerHTML = `
             <div class="order-header">
-
                 <div class="order-id">
                     Заказ #${order.id}
                 </div>
@@ -163,7 +177,6 @@ function renderOrders() {
                 <div class="status ${statusClass}">
                     ${order.status}
                 </div>
-
             </div>
 
             <div class="order-grid">
@@ -243,13 +256,10 @@ function renderOrders() {
 }
 
 function startCRM() {
-
     document.getElementById("loginPage").style.display = "none";
-
     document.getElementById("crmPage").style.display = "block";
 
     loadStats();
-
     loadOrders();
 
     setInterval(() => {
@@ -259,8 +269,9 @@ function startCRM() {
 }
 
 function logout() {
-
     localStorage.removeItem("crm_token");
+    localStorage.removeItem("crm_role");
+    localStorage.removeItem("crm_master");
 
     location.reload();
 }

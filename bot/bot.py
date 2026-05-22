@@ -219,33 +219,6 @@ async def get_photo(message: Message, state: FSMContext):
 
     await state.clear()
 
-@dp.message(AddOrder.photo_url)
-async def get_photo_url(message: Message, state: FSMContext):
-    photo_url = None
-
-    if message.text.lower() != "нет":
-        photo_url = message.text
-
-    await state.update_data(
-        photo_url=photo_url
-    )
-
-    data = await state.get_data()
-
-    result = api.create_order(data)
-
-    if "id" not in result:
-        await message.answer("Ошибка создания заказа. Проверь backend.")
-        await state.clear()
-        return
-
-    await message.answer(
-        f"Заказ создан\nID: {result['id']}",
-        reply_markup=main_keyboard
-    )
-
-    await state.clear()
-
 
 @dp.message(F.text == "📋 Все заказы")
 async def all_orders(message: Message, state: FSMContext):

@@ -294,6 +294,11 @@ function renderOrders() {
                 </div>
 
                 <div class="order-item">
+                    <div class="label">Время выезда</div>
+                    <div class="value">${order.visit_time || "-"}</div>
+                </div>
+
+                <div class="order-item">
                     <div class="label">Мастер</div>
                     <div class="value">${order.master}</div>
                 </div>
@@ -334,6 +339,12 @@ function renderOrders() {
                     class="btn-history"
                     onclick="showHistory(${order.id})">
                     🕘 История
+                </button>
+
+                <button
+                    class="btn-delete"
+                    onclick="deleteOrder(${order.id})">
+                    🗑 Удалить
                 </button>
 
             </div>

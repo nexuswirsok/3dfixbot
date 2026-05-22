@@ -299,7 +299,13 @@ function renderOrders() {
                 </div>
 
             </div>
-
+            
+            ${order.photo_url ? `
+                <div class="order-photo">
+                    <img src="${order.photo_url}" alt="Фото заказа">
+                 </div>
+            ` : ""}
+            
             <div class="actions">
 
                 <button

@@ -10,6 +10,7 @@ class OrderCreate(BaseModel):
     price: str
     accept_date: str
     visit_date: str
+    visit_time: str | None = None
     master: str
     status: str = "Принят"
     photo_url: str | None = None

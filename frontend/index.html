@@ -8,59 +8,84 @@
 </head>
 <body>
 
-<h1>3D FIX LAB CRM</h1>
+<div id="loginPage">
 
-<div class="stats">
+    <h1>3D FIX LAB CRM</h1>
 
-    <div class="stat-box">
-        <div class="stat-title">Всего заказов</div>
-        <div class="stat-value" id="totalOrders">0</div>
-    </div>
+    <div class="login-box">
 
-    <div class="stat-box">
-        <div class="stat-title">В ремонте</div>
-        <div class="stat-value" id="inRepair">0</div>
-    </div>
+        <input
+            type="password"
+            id="password"
+            placeholder="Введите пароль"
+        >
 
-    <div class="stat-box">
-        <div class="stat-title">Готово</div>
-        <div class="stat-value" id="readyOrders">0</div>
-    </div>
+        <button onclick="login()">
+            Войти
+        </button>
 
-    <div class="stat-box">
-        <div class="stat-title">Выдано</div>
-        <div class="stat-value" id="doneOrders">0</div>
-    </div>
-
-    <div class="stat-box">
-        <div class="stat-title">Выручка</div>
-        <div class="stat-value" id="totalRevenue">0 ₽</div>
     </div>
 
 </div>
 
-<h2>KPI мастеров</h2>
-<div id="mastersKpi" class="masters-kpi"></div>
+<div id="crmPage" style="display:none;">
 
-<div class="top-bar">
+    <h1>3D FIX LAB CRM</h1>
 
-    <input
-        type="text"
-        id="search"
-        placeholder="Поиск по клиенту или телефону"
-    >
+    <div class="stats">
 
-    <select id="statusFilter">
-        <option value="all">Все</option>
-        <option value="Принят">Принят</option>
-        <option value="В ремонте">В ремонте</option>
-        <option value="Готов">Готов</option>
-        <option value="Выдан">Выдан</option>
-    </select>
+        <div class="stat-box">
+            <div class="stat-title">Всего заказов</div>
+            <div class="stat-value" id="totalOrders">0</div>
+        </div>
+
+        <div class="stat-box">
+            <div class="stat-title">В ремонте</div>
+            <div class="stat-value" id="inRepair">0</div>
+        </div>
+
+        <div class="stat-box">
+            <div class="stat-title">Готово</div>
+            <div class="stat-value" id="readyOrders">0</div>
+        </div>
+
+        <div class="stat-box">
+            <div class="stat-title">Выдано</div>
+            <div class="stat-value" id="doneOrders">0</div>
+        </div>
+
+        <div class="stat-box">
+            <div class="stat-title">Выручка</div>
+            <div class="stat-value" id="totalRevenue">0 ₽</div>
+        </div>
+
+    </div>
+
+    <h2>KPI мастеров</h2>
+
+    <div id="mastersKpi" class="masters-kpi"></div>
+
+    <div class="top-bar">
+
+        <input
+            type="text"
+            id="search"
+            placeholder="Поиск"
+        >
+
+        <select id="statusFilter">
+            <option value="all">Все</option>
+            <option value="Принят">Принят</option>
+            <option value="В ремонте">В ремонте</option>
+            <option value="Готов">Готов</option>
+            <option value="Выдан">Выдан</option>
+        </select>
+
+    </div>
+
+    <div class="orders" id="orders"></div>
 
 </div>
-
-<div class="orders" id="orders"></div>
 
 <script src="script.js"></script>
 

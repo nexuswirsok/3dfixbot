@@ -427,3 +427,25 @@ async function showHistory(orderId) {
 
     alert(text);
 }
+
+async function deleteOrder(orderId) {
+
+    const confirmed = confirm(`Удалить заказ #${orderId}?`);
+
+    if (!confirmed) {
+        return;
+    }
+
+    const response = await fetch(`${API_URL}/orders/${orderId}`, {
+        method: "DELETE",
+        headers: getHeaders()
+    });
+
+    if (!response.ok) {
+        alert("Удалять заказы может только администратор");
+        return;
+    }
+
+    await loadStats();
+    await loadOrders();
+}

@@ -178,6 +178,23 @@ async def get_master(message: Message, state: FSMContext):
         status="Принят"
     )
 
+    await message.answer(
+        "Вставьте ссылку на фото или напишите: Нет"
+    )
+
+    await state.set_state(AddOrder.photo_url)
+
+@dp.message(AddOrder.photo_url)
+async def get_photo_url(message: Message, state: FSMContext):
+    photo_url = None
+
+    if message.text.lower() != "нет":
+        photo_url = message.text
+
+    await state.update_data(
+        photo_url=photo_url
+    )
+
     data = await state.get_data()
 
     result = api.create_order(data)

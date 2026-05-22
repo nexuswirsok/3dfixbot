@@ -360,3 +360,41 @@ async def get_stats(
         "role": user["role"],
         "master": user["master"]
     }
+@app.get("/telegram-photo/{file_id}")
+async def get_telegram_photo(file_id: str):
+
+    if not BOT_TOKEN:
+        return {
+            "error": "BOT_TOKEN is not set"
+        }
+
+    file_info_url = f"https://api.telegram.org/bot{BOT_TOKEN}/getFile"
+
+    file_info_response = requests.get(
+        file_info_url,
+        params={
+            "file_id": file_id
+        },
+        timeout=10
+    )
+
+    file_info = file_info_response.json()
+
+    if not file_info.get("ok"):
+        return {
+            "error": "Cannot get file info"
+        }
+
+    file_path = file_info["result"]["file_path"]
+
+    file_url = f"https://api.telegram.org/file/bot{BOT_TOKEN}/{file_path}"
+
+    image_response = requests.get(
+        file_url,
+        timeout=15
+    )
+
+    return Response(
+        content=image_response.content,
+        media_type="image/jpeg"
+    )

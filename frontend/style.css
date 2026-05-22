@@ -233,3 +233,7 @@ h2 {
     max-height: 95%;
     border-radius: 16px;
 }
+
+.btn-history {
+    background: #3b82f6;
+}

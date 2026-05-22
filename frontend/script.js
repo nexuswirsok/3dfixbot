@@ -1,4 +1,4 @@
-const API_URL = "https://ТВОЙ_BACKEND_URL";
+const API_URL = "https://3dfixbot-production.up.railway.app";
 
 let orders = [];
 

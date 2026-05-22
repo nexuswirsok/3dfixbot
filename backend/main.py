@@ -165,7 +165,9 @@ async def get_orders(
     query = db.query(Order)
 
     if user["role"] == "master":
-        query = query.filter(Order.master == user["master"])
+    query = query.filter(
+        func.lower(func.trim(Order.master)) == user["master"].strip().lower()
+    )
 
     orders = query.order_by(Order.id.desc()).all()
 
@@ -241,7 +243,9 @@ async def get_stats(
     query = db.query(Order)
 
     if user["role"] == "master":
-        query = query.filter(Order.master == user["master"])
+    query = query.filter(
+        func.lower(func.trim(Order.master)) == user["master"].strip().lower()
+    )
 
     orders = query.all()
 

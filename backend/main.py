@@ -5,6 +5,7 @@ from fastapi import FastAPI, Header, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
+from sqlalchemy import text
 from sqlalchemy import func
 
 from database import engine, SessionLocal
@@ -33,6 +34,10 @@ app.add_middleware(
 
 
 Base.metadata.create_all(bind=engine)
+with engine.begin() as conn:
+    conn.execute(
+        text("ALTER TABLE orders ADD COLUMN IF NOT EXISTS photo_url TEXT")
+    )
 
 
 def parse_master_passwords():
@@ -199,7 +204,8 @@ async def create_order(
         accept_date=order.accept_date,
         visit_date=order.visit_date,
         master=order.master,
-        status=order.status
+        status=order.status,
+        photo_url=order.photo_url
     )
 
     db.add(new_order)
@@ -250,7 +256,8 @@ async def get_orders(
             "accept_date": order.accept_date,
             "visit_date": order.visit_date,
             "master": order.master,
-            "status": order.status
+            "status": order.status,
+            "photo_url": order.photo_url
         })
 
     db.close()

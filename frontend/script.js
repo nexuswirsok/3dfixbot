@@ -336,6 +336,12 @@ function renderOrders() {
                 </button>
 
                 <button
+                    class="btn-edit"
+                    onclick="openEditModal(${order.id})">
+                    ✏️ Редактировать
+                </button>
+
+                <button
                     class="btn-history"
                     onclick="showHistory(${order.id})">
                     🕘 История
@@ -445,6 +451,67 @@ async function deleteOrder(orderId) {
         alert("Удалять заказы может только администратор");
         return;
     }
+
+    await loadStats();
+    await loadOrders();
+}
+
+let editingOrderId = null;
+
+function openEditModal(orderId) {
+    const order = orders.find(item => item.id === orderId);
+
+    if (!order) {
+        alert("Заказ не найден");
+        return;
+    }
+
+    editingOrderId = orderId;
+
+    document.getElementById("editOrderType").value = order.order_type;
+    document.getElementById("editFio").value = order.fio;
+    document.getElementById("editPhone").value = order.phone;
+    document.getElementById("editPrinter").value = order.printer;
+    document.getElementById("editDescription").value = order.description;
+    document.getElementById("editPrice").value = order.price;
+    document.getElementById("editAcceptDate").value = order.accept_date;
+    document.getElementById("editVisitDate").value = order.visit_date;
+    document.getElementById("editVisitTime").value = order.visit_time || "";
+    document.getElementById("editMaster").value = order.master;
+
+    document.getElementById("editModal").style.display = "flex";
+}
+
+function closeEditModal() {
+    document.getElementById("editModal").style.display = "none";
+}
+
+async function saveEdit() {
+    const data = {
+        order_type: document.getElementById("editOrderType").value,
+        fio: document.getElementById("editFio").value,
+        phone: document.getElementById("editPhone").value,
+        printer: document.getElementById("editPrinter").value,
+        description: document.getElementById("editDescription").value,
+        price: document.getElementById("editPrice").value,
+        accept_date: document.getElementById("editAcceptDate").value,
+        visit_date: document.getElementById("editVisitDate").value,
+        visit_time: document.getElementById("editVisitTime").value,
+        master: document.getElementById("editMaster").value
+    };
+
+    const response = await fetch(`${API_URL}/orders/${editingOrderId}`, {
+        method: "PUT",
+        headers: getHeaders(),
+        body: JSON.stringify(data)
+    });
+
+    if (!response.ok) {
+        alert("Редактировать может только администратор");
+        return;
+    }
+
+    closeEditModal();
 
     await loadStats();
     await loadOrders();

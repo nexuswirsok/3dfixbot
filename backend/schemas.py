@@ -16,6 +16,19 @@ class OrderCreate(BaseModel):
     photo_url: str | None = None
 
 
+class OrderUpdate(BaseModel):
+    order_type: str
+    fio: str
+    phone: str
+    printer: str
+    description: str
+    price: str
+    accept_date: str
+    visit_date: str
+    visit_time: str | None = None
+    master: str
+
+
 class StatusUpdate(BaseModel):
     status: str
 

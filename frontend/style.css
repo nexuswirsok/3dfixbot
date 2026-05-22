@@ -151,3 +151,27 @@ button {
     font-weight: bold;
     margin-top: 5px;
 }
+h2 {
+    margin-top: 25px;
+    margin-bottom: 15px;
+}
+
+.masters-kpi {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+}
+
+.master-card {
+    background: #151c33;
+    padding: 15px;
+    border-radius: 14px;
+    min-width: 180px;
+}
+
+.master-name {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 8px;
+}

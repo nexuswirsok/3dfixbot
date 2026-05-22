@@ -488,10 +488,9 @@ async def get_order_history(
     return result
 
 @app.get("/notify-visits")
-async def notify_visits(
-    x_api_key: str | None = Header(default=None)
-):
-    if x_api_key != API_KEY:
+async def notify_visits(key: str):
+
+    if key != API_KEY:
         raise HTTPException(status_code=401, detail="Unauthorized")
 
     db: Session = SessionLocal()

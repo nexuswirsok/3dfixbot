@@ -386,3 +386,27 @@ function closeImageModal() {
 
     document.getElementById("imageModal").style.display = "none";
 }
+
+async function showHistory(orderId) {
+
+    const response = await fetch(`${API_URL}/orders/${orderId}/history`, {
+        headers: getHeaders()
+    });
+
+    const history = await response.json();
+
+    let text = `История заказа #${orderId}\n\n`;
+
+    if (history.length === 0) {
+        text += "Истории пока нет";
+    } else {
+        history.forEach(item => {
+            text += `${item.created_at}\n`;
+            text += `${item.action}\n`;
+            text += `${item.old_value} → ${item.new_value}\n`;
+            text += `Кто: ${item.actor}\n\n`;
+        });
+    }
+
+    alert(text);
+}

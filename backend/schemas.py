@@ -16,3 +16,7 @@ class OrderCreate(BaseModel):
 
 class StatusUpdate(BaseModel):
     status: str
+
+
+class LoginRequest(BaseModel):
+    password: str

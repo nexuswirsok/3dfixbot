@@ -1,4 +1,5 @@
 import os
+import requests
 
 from fastapi import FastAPI, Header, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -15,6 +16,8 @@ API_KEY = os.getenv("API_KEY")
 WEB_PASSWORD = os.getenv("WEB_PASSWORD")
 ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD")
 MASTER_PASSWORDS = os.getenv("MASTER_PASSWORDS", "")
+BOT_TOKEN = os.getenv("BOT_TOKEN")
+MASTER_TELEGRAM_IDS = os.getenv("MASTER_TELEGRAM_IDS", "")
 
 
 app = FastAPI()
@@ -43,7 +46,64 @@ def parse_master_passwords():
             result[password.strip()] = name.strip()
 
     return result
+    
+def parse_master_telegram_ids():
+    result = {}
 
+    pairs = MASTER_TELEGRAM_IDS.split(";")
+
+    for pair in pairs:
+        if ":" in pair:
+            name, telegram_id = pair.split(":", 1)
+            result[name.strip().lower()] = telegram_id.strip()
+
+    return result
+
+
+def send_telegram_message(telegram_id, text):
+    if not BOT_TOKEN:
+        return
+
+    url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
+
+    try:
+        requests.post(
+            url,
+            json={
+                "chat_id": telegram_id,
+                "text": text
+            },
+            timeout=10
+        )
+    except:
+        pass
+
+
+def notify_master_about_order(order):
+    masters = parse_master_telegram_ids()
+
+    master_key = order.master.strip().lower()
+
+    telegram_id = masters.get(master_key)
+
+    if not telegram_id:
+        return
+
+    text = (
+        "🆕 Новый заказ\n\n"
+        f"ID: {order.id}\n"
+        f"Тип: {order.order_type}\n"
+        f"Клиент: {order.fio}\n"
+        f"Телефон: {order.phone}\n"
+        f"Устройство: {order.printer}\n"
+        f"Описание: {order.description}\n"
+        f"Стоимость: {order.price} ₽\n"
+        f"Дата приёма: {order.accept_date}\n"
+        f"Дата выезда: {order.visit_date}\n"
+        f"Мастер: {order.master}"
+    )
+
+    send_telegram_message(telegram_id, text)
 
 def get_auth_user(authorization: str | None, x_api_key: str | None):
     if x_api_key == API_KEY:
@@ -147,6 +207,8 @@ async def create_order(
     db.refresh(new_order)
 
     order_id = new_order.id
+
+    notify_master_about_order(new_order)
 
     db.close()
 

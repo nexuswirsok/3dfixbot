@@ -302,7 +302,11 @@ function renderOrders() {
             
             ${order.photo_url ? `
                 <div class="order-photo">
-                    <img src="${order.photo_url}" alt="Фото заказа">
+                    <img
+                        src="${order.photo_url}"
+                        alt="Фото заказа"
+                        onclick="openImageModal('${order.photo_url}')"
+                    >
                  </div>
             ` : ""}
             
@@ -365,4 +369,20 @@ document.getElementById("statusFilter").addEventListener("change", renderOrders)
 
 if (TOKEN) {
     startCRM();
+}
+
+function openImageModal(imageUrl) {
+
+    const modal = document.getElementById("imageModal");
+
+    const image = document.getElementById("modalImage");
+
+    image.src = imageUrl;
+
+    modal.style.display = "flex";
+}
+
+function closeImageModal() {
+
+    document.getElementById("imageModal").style.display = "none";
 }

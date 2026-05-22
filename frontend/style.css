@@ -1,65 +1,153 @@
 body {
     margin: 0;
-    font-family: Arial, sans-serif;
-    background: #111827;
-    color: white;
-}
-
-.container {
     padding: 20px;
+    background: #0b1020;
+    color: white;
+    font-family: Arial, sans-serif;
 }
 
 h1 {
     margin-bottom: 20px;
 }
 
-.stats {
-    background: #1f2937;
-    padding: 15px;
-    border-radius: 15px;
-    margin-bottom: 15px;
-}
-
-.controls {
+.top-bar {
     display: flex;
     gap: 10px;
     margin-bottom: 20px;
-    flex-direction: column;
 }
 
-input, select {
+input,
+select {
     padding: 12px;
     border-radius: 10px;
     border: none;
     font-size: 16px;
 }
 
-.order {
-    background: #1f2937;
-    padding: 15px;
-    border-radius: 15px;
+input {
+    flex: 1;
+}
+
+.orders {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.order-card {
+    background: #151c33;
+    border-radius: 16px;
+    padding: 18px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.3);
+}
+
+.order-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     margin-bottom: 15px;
 }
 
-.order h3 {
-    margin: 0 0 10px;
+.order-id {
+    font-size: 18px;
+    font-weight: bold;
 }
 
 .status {
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: 14px;
     font-weight: bold;
-    color: #22c55e;
 }
 
-.buttons {
-    display: flex;
+.status-new {
+    background: #2563eb;
+}
+
+.status-progress {
+    background: #f59e0b;
+}
+
+.status-ready {
+    background: #10b981;
+}
+
+.status-done {
+    background: #6b7280;
+}
+
+.order-grid {
+    display: grid;
+    grid-template-columns: 1fr;
     gap: 8px;
+    margin-bottom: 15px;
+}
+
+.order-item {
+    background: #1d2645;
+    padding: 10px;
+    border-radius: 10px;
+}
+
+.label {
+    font-size: 12px;
+    opacity: 0.7;
+    margin-bottom: 3px;
+}
+
+.value {
+    font-size: 15px;
+}
+
+.actions {
+    display: flex;
     flex-wrap: wrap;
-    margin-top: 10px;
+    gap: 10px;
 }
 
 button {
-    padding: 10px;
-    border-radius: 10px;
     border: none;
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 14px;
     cursor: pointer;
+    color: white;
+    font-weight: bold;
+}
+
+.btn-progress {
+    background: #f59e0b;
+}
+
+.btn-ready {
+    background: #10b981;
+}
+
+.btn-done {
+    background: #6b7280;
+}
+
+.stats {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.stat-box {
+    background: #151c33;
+    padding: 15px;
+    border-radius: 14px;
+    min-width: 140px;
+}
+
+.stat-title {
+    opacity: 0.7;
+    font-size: 13px;
+}
+
+.stat-value {
+    font-size: 24px;
+    font-weight: bold;
+    margin-top: 5px;
 }

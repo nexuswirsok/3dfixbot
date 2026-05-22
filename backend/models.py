@@ -29,3 +29,5 @@ class Order(Base):
     master = Column(String)
 
     status = Column(String)
+
+    photo_url = Column(String)

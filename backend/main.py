@@ -486,3 +486,54 @@ async def get_order_history(
     db.close()
 
     return result
+
+@app.get("/notify-visits")
+async def notify_visits(
+    x_api_key: str | None = Header(default=None)
+):
+    if x_api_key != API_KEY:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+
+    db: Session = SessionLocal()
+
+    orders = (
+        db.query(Order)
+        .filter(Order.visit_date != "Нет")
+        .filter(Order.visit_date != "-")
+        .filter(Order.status != "Выдан")
+        .all()
+    )
+
+    sent = 0
+
+    for order in orders:
+        masters = parse_master_telegram_ids()
+
+        master_key = order.master.strip().lower()
+
+        telegram_id = masters.get(master_key)
+
+        if not telegram_id:
+            continue
+
+        text = (
+            "🚗 Напоминание о выезде\n\n"
+            f"Заказ #{order.id}\n"
+            f"Дата выезда: {order.visit_date}\n"
+            f"Клиент: {order.fio}\n"
+            f"Телефон: {order.phone}\n"
+            f"Устройство: {order.printer}\n"
+            f"Описание: {order.description}\n"
+            f"Статус: {order.status}"
+        )
+
+        send_telegram_message(telegram_id, text)
+
+        sent += 1
+
+    db.close()
+
+    return {
+        "message": "Visit notifications sent",
+        "sent": sent
+    }

@@ -1,3 +1,4 @@
+from fastapi.responses import JSONResponse
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
@@ -85,7 +86,10 @@ async def get_orders():
 
     db.close()
 
-    return result
+    return JSONResponse(
+    content=result,
+    media_type="application/json; charset=utf-8"
+)
 
 
 @app.put("/orders/{order_id}/status")

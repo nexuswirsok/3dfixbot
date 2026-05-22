@@ -37,6 +37,14 @@ app.add_middleware(
 Base.metadata.create_all(bind=engine)
 with engine.begin() as conn:
     conn.execute(
+        text("ALTER TABLE orders ADD COLUMN IF NOT EXISTS visit_time TEXT")
+    )
+
+    conn.execute(
+        text("ALTER TABLE orders ADD COLUMN IF NOT EXISTS photo_url TEXT")
+    )
+with engine.begin() as conn:
+    conn.execute(
         text("ALTER TABLE orders ADD COLUMN IF NOT EXISTS photo_url TEXT")
     )
 
@@ -219,6 +227,7 @@ async def create_order(
         price=order.price,
         accept_date=order.accept_date,
         visit_date=order.visit_date,
+        visit_time=order.visit_time,
         master=order.master,
         status=order.status,
         photo_url=order.photo_url
@@ -279,6 +288,7 @@ async def get_orders(
             "price": order.price,
             "accept_date": order.accept_date,
             "visit_date": order.visit_date,
+            "visit_time": order.visit_time,
             "master": order.master,
             "status": order.status,
             "photo_url": order.photo_url
@@ -535,4 +545,36 @@ async def notify_visits(key: str):
     return {
         "message": "Visit notifications sent",
         "sent": sent
+    }
+
+@app.delete("/orders/{order_id}")
+async def delete_order(
+    order_id: int,
+    authorization: str | None = Header(default=None),
+    x_api_key: str | None = Header(default=None)
+):
+    user = get_auth_user(authorization, x_api_key)
+
+    if user["role"] != "admin":
+        raise HTTPException(status_code=403, detail="Only admin can delete orders")
+
+    db: Session = SessionLocal()
+
+    order = db.query(Order).filter(Order.id == order_id).first()
+
+    if not order:
+        db.close()
+        return {
+            "error": "Order not found"
+        }
+
+    db.query(OrderHistory).filter(OrderHistory.order_id == order_id).delete()
+
+    db.delete(order)
+    db.commit()
+    db.close()
+
+    return {
+        "message": "Order deleted",
+        "id": order_id
     }

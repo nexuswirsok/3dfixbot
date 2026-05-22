@@ -1,12 +1,18 @@
 import requests
 
-from config import BACKEND_URL
+from config import BACKEND_URL, API_KEY
+
+
+HEADERS = {
+    "X-API-Key": API_KEY
+}
 
 
 def create_order(data):
     response = requests.post(
         f"{BACKEND_URL}/orders",
         json=data,
+        headers=HEADERS,
         timeout=15
     )
 
@@ -16,6 +22,7 @@ def create_order(data):
 def get_orders():
     response = requests.get(
         f"{BACKEND_URL}/orders",
+        headers=HEADERS,
         timeout=15
     )
 
@@ -28,6 +35,7 @@ def update_status(order_id, status):
         json={
             "status": status
         },
+        headers=HEADERS,
         timeout=15
     )
 
@@ -37,6 +45,7 @@ def update_status(order_id, status):
 def get_stats():
     response = requests.get(
         f"{BACKEND_URL}/stats",
+        headers=HEADERS,
         timeout=15
     )
 

@@ -63,13 +63,16 @@ def get_auth_user(authorization: str | None, x_api_key: str | None):
             "master": None
         }
 
-    if token.startswith("master:"):
-        master_name = token.replace("master:", "", 1)
+    if token.startswith("master_token:"):
+        password = token.replace("master_token:", "", 1)
 
-        return {
-            "role": "master",
-            "master": master_name
-        }
+        masters = parse_master_passwords()
+
+        if password in masters:
+            return {
+                "role": "master",
+                "master": masters[password]
+            }
 
     raise HTTPException(status_code=401, detail="Unauthorized")
 
@@ -103,7 +106,7 @@ async def login(data: LoginRequest):
         master_name = masters[data.password]
 
         return {
-            "token": f"master:{master_name}",
+            "token": f"master_token:{data.password}",
             "role": "master",
             "master": master_name
         }

@@ -12,6 +12,7 @@ class OrderCreate(BaseModel):
     visit_date: str
     master: str
     status: str = "Принят"
+    photo_url: str | None = None
 
 
 class StatusUpdate(BaseModel):

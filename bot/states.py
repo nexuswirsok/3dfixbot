@@ -10,6 +10,7 @@ class AddOrder(StatesGroup):
     price = State()
     accept_date = State()
     visit_date = State()
+    visit_time = State()
     master = State()
     photo = State()
     search = State()

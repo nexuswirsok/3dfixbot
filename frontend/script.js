@@ -14,6 +14,7 @@ function getHeaders() {
 }
 
 async function login() {
+
     const password = document.getElementById("password").value;
 
     const response = await fetch(`${API_URL}/login`, {
@@ -50,6 +51,7 @@ async function login() {
 }
 
 async function loadStats() {
+
     const response = await fetch(`${API_URL}/stats`, {
         headers: getHeaders()
     });
@@ -76,17 +78,15 @@ async function loadStats() {
     }
 
     const mastersContainer = document.getElementById("mastersKpi");
+
     mastersContainer.innerHTML = "";
 
     const masters = stats.masters || {};
 
-    if (Object.keys(masters).length === 0) {
-        mastersContainer.innerHTML = "<p>Нет данных</p>";
-        return;
-    }
-
     Object.keys(masters).forEach(master => {
+
         const item = document.createElement("div");
+
         item.className = "master-card";
 
         item.innerHTML = `
@@ -96,10 +96,12 @@ async function loadStats() {
         `;
 
         mastersContainer.appendChild(item);
+
     });
 }
 
 async function loadOrders() {
+
     const response = await fetch(`${API_URL}/orders`, {
         headers: getHeaders()
     });
@@ -111,10 +113,71 @@ async function loadOrders() {
 
     orders = await response.json();
 
+    renderVisits();
+
     renderOrders();
 }
 
+function renderVisits() {
+
+    const container = document.getElementById("visitsContainer");
+
+    container.innerHTML = "";
+
+    const visits = orders.filter(order =>
+        order.visit_date &&
+        order.visit_date !== "-" &&
+        order.visit_date !== "Нет"
+    );
+
+    if (visits.length === 0) {
+        container.innerHTML = `
+            <div class="visit-card">
+                Нет выездов
+            </div>
+        `;
+        return;
+    }
+
+    visits.forEach(order => {
+
+        const card = document.createElement("div");
+
+        card.className = "visit-card";
+
+        card.innerHTML = `
+            <div class="visit-date">
+                📅 ${order.visit_date}
+            </div>
+
+            <div>
+                <strong>${order.fio}</strong>
+            </div>
+
+            <div>
+                ${order.phone}
+            </div>
+
+            <div>
+                ${order.printer}
+            </div>
+
+            <div>
+                👨‍🔧 ${order.master}
+            </div>
+
+            <div>
+                ${order.description}
+            </div>
+        `;
+
+        container.appendChild(card);
+
+    });
+}
+
 async function updateStatus(orderId, status) {
+
     await fetch(`${API_URL}/orders/${orderId}/status`, {
         method: "PUT",
         headers: getHeaders(),
@@ -124,17 +187,22 @@ async function updateStatus(orderId, status) {
     });
 
     await loadStats();
+
     await loadOrders();
 }
 
 function renderOrders() {
+
     const search = document.getElementById("search").value.toLowerCase();
+
     const filter = document.getElementById("statusFilter").value;
 
     const container = document.getElementById("orders");
+
     container.innerHTML = "";
 
     const filtered = orders.filter(order => {
+
         const matchesSearch =
             order.fio.toLowerCase().includes(search) ||
             order.phone.includes(search);
@@ -151,6 +219,7 @@ function renderOrders() {
     }
 
     filtered.forEach(order => {
+
         let statusClass = "status-new";
 
         if (order.status === "В ремонте") {
@@ -166,10 +235,12 @@ function renderOrders() {
         }
 
         const card = document.createElement("div");
+
         card.className = "order-card";
 
         card.innerHTML = `
             <div class="order-header">
+
                 <div class="order-id">
                     Заказ #${order.id}
                 </div>
@@ -177,6 +248,7 @@ function renderOrders() {
                 <div class="status ${statusClass}">
                     ${order.status}
                 </div>
+
             </div>
 
             <div class="order-grid">
@@ -252,14 +324,18 @@ function renderOrders() {
         `;
 
         container.appendChild(card);
+
     });
 }
 
 function startCRM() {
+
     document.getElementById("loginPage").style.display = "none";
+
     document.getElementById("crmPage").style.display = "block";
 
     loadStats();
+
     loadOrders();
 
     setInterval(() => {
@@ -269,6 +345,7 @@ function startCRM() {
 }
 
 function logout() {
+
     localStorage.removeItem("crm_token");
     localStorage.removeItem("crm_role");
     localStorage.removeItem("crm_master");

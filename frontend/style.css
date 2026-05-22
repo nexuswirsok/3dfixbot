@@ -241,3 +241,24 @@ h2 {
 .btn-delete {
     background: #dc2626;
 }
+
+.btn-edit {
+    background: #8b5cf6;
+}
+
+.edit-box {
+    background: #151c33;
+    padding: 20px;
+    border-radius: 16px;
+    width: 90%;
+    max-width: 420px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.edit-box input {
+    padding: 12px;
+    border-radius: 10px;
+    border: none;
+}

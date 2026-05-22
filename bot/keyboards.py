@@ -1,9 +1,22 @@
-from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
-from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.types import (
+    ReplyKeyboardMarkup,
+    KeyboardButton,
+    InlineKeyboardMarkup,
+    InlineKeyboardButton,
+    WebAppInfo
+)
+
+from config import FRONTEND_URL
 
 
 main_keyboard = ReplyKeyboardMarkup(
     keyboard=[
+        [
+            KeyboardButton(
+                text="📱 Открыть CRM",
+                web_app=WebAppInfo(url=FRONTEND_URL)
+            )
+        ],
         [KeyboardButton(text="➕ Новый заказ")],
         [KeyboardButton(text="📋 Все заказы")],
         [KeyboardButton(text="🔍 Поиск клиента")],

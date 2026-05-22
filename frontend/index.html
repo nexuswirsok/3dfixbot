@@ -100,6 +100,26 @@
 <div id="imageModal" class="image-modal" onclick="closeImageModal()">
     <img id="modalImage" class="modal-image">
 </div>    
+
+<div id="editModal" class="image-modal">
+    <div class="edit-box">
+        <h2>Редактировать заказ</h2>
+
+        <input id="editOrderType" placeholder="Тип заказа">
+        <input id="editFio" placeholder="ФИО">
+        <input id="editPhone" placeholder="Телефон">
+        <input id="editPrinter" placeholder="Устройство">
+        <input id="editDescription" placeholder="Описание">
+        <input id="editPrice" placeholder="Стоимость">
+        <input id="editAcceptDate" placeholder="Дата принятия">
+        <input id="editVisitDate" placeholder="Дата выезда">
+        <input id="editVisitTime" placeholder="Время выезда">
+        <input id="editMaster" placeholder="Мастер">
+
+        <button onclick="saveEdit()">💾 Сохранить</button>
+        <button onclick="closeEditModal()">Отмена</button>
+    </div>
+</div>
     
 <script src="script.js"></script>
 
